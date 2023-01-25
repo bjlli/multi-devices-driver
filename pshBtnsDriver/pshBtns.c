@@ -102,12 +102,11 @@ static int gpio_init_probe(struct platform_device *pdev){
         printk("Not first time on probe!");
     }
 
-    sprintf((pshBtn_info+times_onProbe)->buffer, "%s_%d", "push_button", times_onProbe);
-    printk("Dev_num: %d", (device_trigger+times_onProbe)->dev_num);
+    sprintf((pBtn_info+times_onProbe)->buffer, "%s_%d", "push_button", times_onProbe);
 
-    (device_class+times_onProbe)->name = (device_trigger+times_onProbe)->buffer;
+    (device_class+times_onProbe)->name = (pBtn_info+times_onProbe)->buffer;
     (device_class+times_onProbe)->owner = THIS_MODULE;
-    arq = __class_register((device_class+times_onProbe),&__key);
+    ret = __class_register((device_class+times_onProbe),&__key);
 
     (*(class_attr + times_onProbe)).show = show_pressNum;
     (*(class_attr + times_onProbe)).store = store_pressNum;
@@ -131,8 +130,8 @@ static int gpio_exit_remove(struct platform_device *pdev){
 	    kfree(pBtn_info);
     }else{
     	printk("Not the first time on remove");
-	    class_unregister((chardev_class+times_onRemove));
-	    class_destroy((chardev_class+times_onRemove));
+	    class_unregister((device_class+times_onRemove));
+	    class_destroy((device_class+times_onRemove));
     }
     times_onRemove = times_onRemove + 1;
     
