@@ -22,7 +22,7 @@ struct device_info{
     int dev_num;
     const char *pBtn_label;
     char buffer[15];
-    uint number_presses;
+    uint numOf_presses;
     int irq_num;
 };
 
@@ -56,8 +56,14 @@ static struct platform_driver pshBtns_driver = {
 /* Show and store functions definitions */
 
 static ssize_t show_pressNum( struct class *class, struct class_attribute *attr, char *buf ){
-    int value = 0;
-    printk("READ!");
+    uint value = 0;
+    int num = 0;
+
+    num = (int)(*class).name[13];                                                                                  \    
+    num = num - 48;                                                                                                  \               
+    printk("Push button number: %d, READ!", num);  
+    value = (pBtn_info+num)->numOf_presses;
+
     return sprintf(buf, "%d", value); 
 }
 
@@ -70,7 +76,18 @@ static ssize_t store_pressNum( struct class *class, struct class_attribute *attr
 /* Interrupt callback */
 
 static irq_handler_t gpio_irq_handler(unsigned int irq, void *dev_id, struct pt_regs *regs) {
-    printk(KERN_ALERT"INTERRUPT!\n");
+    printk(KERN_ALERT "Interrupt was triggered!\n");
+ 
+    int irq_count = 0;
+    for(irq_count=0; irq_count<=times_onProbe;irq_count++){
+        if((pBtn_info+irq_count)->num == irq){
+            break;
+        }
+    }
+
+    printk("The push button %d was pressed", (pBtn_info+irq_count)->dev_num);
+    (pBtn_info+irq_count)->numOf_presses = (pBtn_info+irq_count)->numOf_presses + 1;
+
     return (irq_handler_t) IRQ_HANDLED; 
 }
 
@@ -84,7 +101,7 @@ struct device_info *pBtn_info = NULL;
 
 static int gpio_init_probe(struct platform_device *pdev){
 
-    printk("PROBE!\n");
+    printk("Probe!\n");
     int ret;
     struct device *dev = &pdev->dev;
     static struct lock_class_key __key;
@@ -113,6 +130,7 @@ static int gpio_init_probe(struct platform_device *pdev){
     /* Overlay variables */
     ret = device_property_read_string(dev,"pBtn_label",&(pBtn_info+times_onProbe)->pBtn_label);
     ret = device_property_read_u32(dev,"pBTn_gpio",&(pBtn_info+times_onProbe)->pBtn_gpio);
+    ret = device_property_read_u32(dev,"dev_num",&(pBtn_info+times_onProbe)->dev_num);
     sprintf((pBtn_info+times_onProbe)->buffer, "%s_%d", "push_button", times_onProbe);
 
     /* Class */
@@ -162,14 +180,18 @@ static int gpio_exit_remove(struct platform_device *pdev){
     	class_destroy(device_class);
     	kfree(class_attr);
 	    kfree(pBtn_info);
+        free_irq(pBtn_info->irq_num,NULL);
+        gpio_free(pBtn_info->pBtn_gpio);
     }else{
     	printk("Not the first time on remove");
 	    class_unregister((device_class+times_onRemove));
 	    class_destroy((device_class+times_onRemove));
+        free_irq((pBtn_info+times_onRemove)->irq_num,NULL);
+        gpio_free((pBtn_info+times_onRemove)->pBtn_gpio);
     }
     times_onRemove = times_onRemove + 1;
     
-    printk("REMOVE!\n");
+    printk("Remove!\n");
 
     return 0;
 
