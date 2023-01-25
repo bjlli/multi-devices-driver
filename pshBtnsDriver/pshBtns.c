@@ -5,6 +5,8 @@
 #include <linux/of_device.h>
 #include <linux/gpio/consumer.h>
 #include <linux/platform_device.h>
+#include <linux/gpio.h>
+#include <linux/interrupt.h>
 
 /* Defines */
 
@@ -68,7 +70,7 @@ static ssize_t store_pressNum( struct class *class, struct class_attribute *attr
 /* Interrupt callback */
 
 static irq_handler_t gpio_irq_handler(unsigned int irq, void *dev_id, struct pt_regs *regs) {
-    printk(KERN_ALERT"INTERRUPT\n!")
+    printk(KERN_ALERT"INTERRUPT!\n");
     return (irq_handler_t) IRQ_HANDLED; 
 }
 
@@ -138,10 +140,10 @@ static int gpio_init_probe(struct platform_device *pdev){
 	}
 	/* Saving the IRQ number */
     (pBtn_info+times_onProbe)->irq_num = gpio_to_irq((pBtn_info+times_onProbe)->pBtn_gpio);
-    printk("IRQ num:%d", (pBtn_info+times_onProbe)->irq_snum);
+    printk("IRQ num:%d", (pBtn_info+times_onProbe)->irq_num);
     /*  IRQ */
 	if(request_irq((pBtn_info+times_onProbe)->irq_num, (irq_handler_t) gpio_irq_handler, IRQF_TRIGGER_FALLING, "my_gpio_irq", NULL) != 0){
-		printk("Interrupt error!\n: %d\n", irq_num);
+		printk("Interrupt error!\n: %d\n", (pBtn_info+times_onProbe)->irq_num);
 		gpio_free((pBtn_info+times_onProbe)->pBtn_gpio);
 		return -1;
 	}
