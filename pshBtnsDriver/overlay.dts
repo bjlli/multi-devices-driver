@@ -9,8 +9,8 @@
                                 dev_num = <0>;
                                 compatible = "emc-logic, pshBtns";
                                 status = "okay";
-                                sens_label = "rpi-gpio-11";
-                                sens_gpio = <11>;
+                                pBtn_label = "rpi-gpio-11";
+                                pBTn_gpio = <11>;
                         };
                 };
         };
