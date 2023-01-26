@@ -1,0 +1,17 @@
+/dts-v1/;
+/plugin/;
+/{
+	compatible = "allwinner,sun8i-h3";
+	fragment@0 {
+		target-path = "/";
+		__overlay__{
+			my_device_1{
+				dev_num = <1>;
+				compatible = "emc-logic, pshBtns";
+				status = "okay";
+				pBtn_label = "rpi-gpio-11";
+				pBtn_gpio = <11>;
+			};
+		};
+	};
+};
