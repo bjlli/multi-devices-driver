@@ -155,6 +155,7 @@ static int gpio_init_probe(struct platform_device *pdev){
 		gpio_free((pBtn_info+times_onProbe)->pBtn_gpio);
 		return -1;
 	}
+ 
 	/* Saving the IRQ number */
     (pBtn_info+times_onProbe)->irq_num = gpio_to_irq((pBtn_info+times_onProbe)->pBtn_gpio);
     printk("IRQ num:%d", (pBtn_info+times_onProbe)->irq_num);
@@ -164,6 +165,9 @@ static int gpio_init_probe(struct platform_device *pdev){
 		gpio_free((pBtn_info+times_onProbe)->pBtn_gpio);
 		return -1;
 	}
+	    if(gpio_set_debounce((pBtn_info+times_onProbe)->pBtn_gpio,100)){
+        printk("Debounce\n");
+    }
 
     times_onProbe = times_onProbe + 1;
 
