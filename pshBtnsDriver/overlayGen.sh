@@ -16,3 +16,4 @@ echo "			};" >> overlay-$1.dts
 echo "		};" >> overlay-$1.dts
 echo "	};" >> overlay-$1.dts
 echo "};" >> overlay-$1.dts
+armbian-add-overlay overlay-$1.dts

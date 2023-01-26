@@ -128,7 +128,7 @@ static int gpio_init_probe(struct platform_device *pdev){
 
     /* Overlay variables */
     ret = device_property_read_string(dev,"pBtn_label",&(pBtn_info+times_onProbe)->pBtn_label);
-    ret = device_property_read_u32(dev,"pBTn_gpio",&(pBtn_info+times_onProbe)->pBtn_gpio);
+    ret = device_property_read_u32(dev,"pBtn_gpio",&(pBtn_info+times_onProbe)->pBtn_gpio);
     ret = device_property_read_u32(dev,"dev_num",&(pBtn_info+times_onProbe)->dev_num);
     sprintf((pBtn_info+times_onProbe)->buffer, "%s_%d", "push_button", times_onProbe);
 
