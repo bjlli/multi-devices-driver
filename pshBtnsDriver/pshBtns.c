@@ -14,8 +14,8 @@
 
 /* Global variables */
 
-uint times_onProbe = 0;
-uint times_onRemove = 0;
+int times_onProbe = 0;
+int times_onRemove = 0;
 
 struct device_info{
     int pBtn_gpio;
@@ -26,15 +26,13 @@ struct device_info{
     int irq_num;
 };
 
-/* Probe/remove functions declarations */
+/* Functions declarations */
 
 static int gpio_init_probe(struct platform_device *pdev);
 static int gpio_exit_remove(struct platform_device *pdev);
-
-/* Show/store functions declarations */
-
 static ssize_t show_pressNum( struct class *class, struct class_attribute *attr, char *buf );
 static ssize_t store_pressNum( struct class *class, struct class_attribute *attr, const char *buf, size_t count );
+static irq_handler_t gpio_irq_handler(unsigned int irq, void *dev_id, struct pt_regs *regs);
 
 /* Strcuts declarations*/
 
@@ -53,13 +51,20 @@ static struct platform_driver pshBtns_driver = {
     }
 };
 
+/* Variables definitions */
+
+static struct class *device_class = NULL;
+struct class_attribute *class_attr = NULL;
+struct device_info *pBtn_info = NULL;
+
+
 /* Show and store functions definitions */
 
 static ssize_t show_pressNum( struct class *class, struct class_attribute *attr, char *buf ){
     uint value = 0;
     int num = 0;
 
-    num = (int)(*class).name[13];                                                                                  \    
+    num = (int)(*class).name[12];                                                                                  \    
     num = num - 48;                                                                                                  \               
     printk("Push button number: %d, READ!", num);  
     value = (pBtn_info+num)->numOf_presses;
@@ -80,7 +85,7 @@ static irq_handler_t gpio_irq_handler(unsigned int irq, void *dev_id, struct pt_
  
     int irq_count = 0;
     for(irq_count=0; irq_count<=times_onProbe;irq_count++){
-        if((pBtn_info+irq_count)->num == irq){
+        if((pBtn_info+irq_count)->irq_num == irq){
             break;
         }
     }
@@ -90,12 +95,6 @@ static irq_handler_t gpio_irq_handler(unsigned int irq, void *dev_id, struct pt_
 
     return (irq_handler_t) IRQ_HANDLED; 
 }
-
-/* Variables definitions */
-
-static struct class *device_class = NULL;
-struct class_attribute *class_attr = NULL;
-struct device_info *pBtn_info = NULL;
 
 /* Probe and remove functions definitions*/
 
@@ -175,17 +174,17 @@ static int gpio_init_probe(struct platform_device *pdev){
 static int gpio_exit_remove(struct platform_device *pdev){
 
     if(times_onRemove == 0){
-	    printk("First time on remove");    
+	 printk("First time on remove");    
     	class_unregister(device_class);
     	class_destroy(device_class);
     	kfree(class_attr);
-	    kfree(pBtn_info);
+	kfree(pBtn_info);
         free_irq(pBtn_info->irq_num,NULL);
         gpio_free(pBtn_info->pBtn_gpio);
     }else{
     	printk("Not the first time on remove");
-	    class_unregister((device_class+times_onRemove));
-	    class_destroy((device_class+times_onRemove));
+	class_unregister((device_class+times_onRemove));
+	class_destroy((device_class+times_onRemove));
         free_irq((pBtn_info+times_onRemove)->irq_num,NULL);
         gpio_free((pBtn_info+times_onRemove)->pBtn_gpio);
     }
