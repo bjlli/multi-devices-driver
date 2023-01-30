@@ -83,15 +83,17 @@ static ssize_t store_pressNum( struct class *class, struct class_attribute *attr
 
 static irq_handler_t gpio_irq_handler(unsigned int irq, void *dev_id, struct pt_regs *regs) {
     printk(KERN_ALERT "Interrupt was triggered!\n");
- 
+	printk("Irq is:%d", irq); 
     int irq_count = 0;
     for(irq_count=0; irq_count<=device_num;irq_count++){
+
         if((pBtn_info+irq_count)->irq_num == irq){
             break;
         }
     }
 
     printk("The push button %d was pressed", (pBtn_info+irq_count)->dev_num);
+    printk("GPIO number %d", (pBtn_info+irq_count)->pBtn_gpio);
     (pBtn_info+irq_count)->numOf_presses = (pBtn_info+irq_count)->numOf_presses + 1;
 
     return (irq_handler_t) IRQ_HANDLED; 
@@ -122,19 +124,19 @@ static int gpio_init_probe(struct platform_device *pdev){
         if(!pBtn_info){
 		    printk("device_info allocation error");
 	    }
-        first_time_onProbe == 1;
+        first_time_onProbe = 1;
         printk("First time on probe!");
     }else{
         printk("Not first time on probe!");
     }
 
     /* Overlay variables */
-    ret = device_property_read_u32(dev,"dev_num",device_num);
-    &(pBtn_info+device_num)->dev_num = device_num;
+    ret = device_property_read_u32(dev,"dev_num",&device_num);
+    (pBtn_info+device_num)->dev_num = device_num;
     ret = device_property_read_string(dev,"pBtn_label",&(pBtn_info+device_num)->pBtn_label);
     ret = device_property_read_u32(dev,"pBtn_gpio",&(pBtn_info+device_num)->pBtn_gpio);
     sprintf((pBtn_info+device_num)->buffer, "%s_%d", "push_button", device_num);
-	printk("Device number is: %d", (pBtn_info+device_num)->dev_num);
+	printk("Device number is: %d", device_num);
     printk("GPIO pin is: %d", (pBtn_info+device_num)->pBtn_gpio);
 
     /* Class */
