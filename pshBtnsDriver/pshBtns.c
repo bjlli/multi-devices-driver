@@ -66,7 +66,8 @@ static ssize_t show_pressNum( struct class *class, struct class_attribute *attr,
 
     num = (int)(*class).name[12];                                                                                  \    
     num = num - 48;                                                                                                  \               
-    printk("Push button number: %d, READ!", num);  
+    printk("Push button number: %d, READ!", num);
+  	printk("Teste gpio num: %d", (pBtn_info+num)->pBtn_gpio);  
     value = (pBtn_info+num)->numOf_presses;
 
     return sprintf(buf, "%d", value); 
@@ -131,7 +132,8 @@ static int gpio_init_probe(struct platform_device *pdev){
     ret = device_property_read_u32(dev,"pBtn_gpio",&(pBtn_info+times_onProbe)->pBtn_gpio);
     ret = device_property_read_u32(dev,"dev_num",&(pBtn_info+times_onProbe)->dev_num);
     sprintf((pBtn_info+times_onProbe)->buffer, "%s_%d", "push_button", times_onProbe);
-
+	printk("dev_num is %d", (pBtn_info+times_onProbe)->dev_num);
+       	printk("pBtn_gpio is %d", (pBtn_info+times_onProbe)->pBtn_gpio);	
     /* Class */
     (device_class+times_onProbe)->name = (pBtn_info+times_onProbe)->buffer;
     (device_class+times_onProbe)->owner = THIS_MODULE;
