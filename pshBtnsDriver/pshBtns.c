@@ -14,8 +14,8 @@
 
 /* Global variables */
 
-int first_time_onProbe = 0;
 int device_num = 0;
+int times_onProbe = 0;
 int times_onRemove = 0;
 
 struct device_info{
@@ -85,7 +85,7 @@ static irq_handler_t gpio_irq_handler(unsigned int irq, void *dev_id, struct pt_
     printk(KERN_ALERT "Interrupt was triggered!\n");
 	printk("Irq is:%d", irq); 
     int irq_count = 0;
-    for(irq_count=0; irq_count<=device_num;irq_count++){
+    for(irq_count=0; irq_count<=times_onProbe;irq_count++){
 
         if((pBtn_info+irq_count)->irq_num == irq){
             break;
@@ -108,7 +108,7 @@ static int gpio_init_probe(struct platform_device *pdev){
     struct device *dev = &pdev->dev;
     static struct lock_class_key __key;
     
-    if(first_time_onProbe == 0){
+    if(times_onProbe == 0){
         /* class allocation */
         device_class = (struct class *)kmalloc(MAX_DEV_NUM*sizeof(struct class),GFP_ATOMIC);
         if(!device_class){
@@ -124,7 +124,6 @@ static int gpio_init_probe(struct platform_device *pdev){
         if(!pBtn_info){
 		    printk("device_info allocation error");
 	    }
-        first_time_onProbe = 1;
         printk("First time on probe!");
     }else{
         printk("Not first time on probe!");
@@ -176,7 +175,7 @@ static int gpio_init_probe(struct platform_device *pdev){
         printk("Debounce\n");
     }
 
-
+    times_onProbe = times_onProbe + 1;
     return 0;
 
 }
