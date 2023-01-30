@@ -14,7 +14,8 @@
 
 /* Global variables */
 
-int times_onProbe = 0;
+int first_time_onProbe = 0;
+int device_num = 0;
 int times_onRemove = 0;
 
 struct device_info{
@@ -67,7 +68,6 @@ static ssize_t show_pressNum( struct class *class, struct class_attribute *attr,
     num = (int)(*class).name[12];                                                                                  \    
     num = num - 48;                                                                                                  \               
     printk("Push button number: %d, READ!", num);
-  	printk("Teste gpio num: %d", (pBtn_info+num)->pBtn_gpio);  
     value = (pBtn_info+num)->numOf_presses;
 
     return sprintf(buf, "%d", value); 
@@ -85,7 +85,7 @@ static irq_handler_t gpio_irq_handler(unsigned int irq, void *dev_id, struct pt_
     printk(KERN_ALERT "Interrupt was triggered!\n");
  
     int irq_count = 0;
-    for(irq_count=0; irq_count<=times_onProbe;irq_count++){
+    for(irq_count=0; irq_count<=device_num;irq_count++){
         if((pBtn_info+irq_count)->irq_num == irq){
             break;
         }
@@ -106,7 +106,7 @@ static int gpio_init_probe(struct platform_device *pdev){
     struct device *dev = &pdev->dev;
     static struct lock_class_key __key;
     
-    if(times_onProbe == 0){
+    if(first_time_onProbe == 0){
         /* class allocation */
         device_class = (struct class *)kmalloc(MAX_DEV_NUM*sizeof(struct class),GFP_ATOMIC);
         if(!device_class){
@@ -122,56 +122,58 @@ static int gpio_init_probe(struct platform_device *pdev){
         if(!pBtn_info){
 		    printk("device_info allocation error");
 	    }
+        first_time_onProbe == 1;
         printk("First time on probe!");
     }else{
         printk("Not first time on probe!");
     }
 
     /* Overlay variables */
-    ret = device_property_read_string(dev,"pBtn_label",&(pBtn_info+times_onProbe)->pBtn_label);
-    ret = device_property_read_u32(dev,"pBtn_gpio",&(pBtn_info+times_onProbe)->pBtn_gpio);
-    ret = device_property_read_u32(dev,"dev_num",&(pBtn_info+times_onProbe)->dev_num);
-    sprintf((pBtn_info+times_onProbe)->buffer, "%s_%d", "push_button", times_onProbe);
-	printk("dev_num is %d", (pBtn_info+times_onProbe)->dev_num);
-       	printk("pBtn_gpio is %d", (pBtn_info+times_onProbe)->pBtn_gpio);	
+    ret = device_property_read_u32(dev,"dev_num",device_num);
+    &(pBtn_info+device_num)->dev_num = device_num;
+    ret = device_property_read_string(dev,"pBtn_label",&(pBtn_info+device_num)->pBtn_label);
+    ret = device_property_read_u32(dev,"pBtn_gpio",&(pBtn_info+device_num)->pBtn_gpio);
+    sprintf((pBtn_info+device_num)->buffer, "%s_%d", "push_button", device_num);
+	printk("Device number is: %d", (pBtn_info+device_num)->dev_num);
+    printk("GPIO pin is: %d", (pBtn_info+device_num)->pBtn_gpio);
+
     /* Class */
-    (device_class+times_onProbe)->name = (pBtn_info+times_onProbe)->buffer;
-    (device_class+times_onProbe)->owner = THIS_MODULE;
-    ret = __class_register((device_class+times_onProbe),&__key);
+    (device_class+device_num)->name = (pBtn_info+device_num)->buffer;
+    (device_class+device_num)->owner = THIS_MODULE;
+    ret = __class_register((device_class+device_num),&__key);
 
     /* Class attributes */
-    (*(class_attr + times_onProbe)).show = show_pressNum;
-    (*(class_attr + times_onProbe)).store = store_pressNum;
-    (*(class_attr + times_onProbe)).attr.name = "pressNum";
-    (*(class_attr + times_onProbe)).attr.mode = 0777 ;
-    ret = class_create_file((device_class+times_onProbe), &(*(class_attr+times_onProbe)));
+    (*(class_attr + device_num)).show = show_pressNum;
+    (*(class_attr + device_num)).store = store_pressNum;
+    (*(class_attr + device_num)).attr.name = "pressNum";
+    (*(class_attr + device_num)).attr.mode = 0777 ;
+    ret = class_create_file((device_class+device_num), &(*(class_attr+device_num)));
 
     /* allocating push button GPIO*/
-    if(gpio_request((pBtn_info+times_onProbe)->pBtn_gpio, (pBtn_info+times_onProbe)->pBtn_label)){
+    if(gpio_request((pBtn_info+device_num)->pBtn_gpio, (pBtn_info+device_num)->pBtn_label)){
 		printk("Error!\n");
 		return -1;
 	}
     /* push button GPIO defined as input */
-    if(gpio_direction_input((pBtn_info+times_onProbe)->pBtn_gpio)) {
+    if(gpio_direction_input((pBtn_info+device_num)->pBtn_gpio)) {
 		printk("Error!\n");
-		gpio_free((pBtn_info+times_onProbe)->pBtn_gpio);
+		gpio_free((pBtn_info+device_num)->pBtn_gpio);
 		return -1;
 	}
  
 	/* Saving the IRQ number */
-    (pBtn_info+times_onProbe)->irq_num = gpio_to_irq((pBtn_info+times_onProbe)->pBtn_gpio);
-    printk("IRQ num:%d", (pBtn_info+times_onProbe)->irq_num);
+    (pBtn_info+device_num)->irq_num = gpio_to_irq((pBtn_info+device_num)->pBtn_gpio);
+    printk("IRQ num:%d", (pBtn_info+device_num)->irq_num);
     /*  IRQ */
-	if(request_irq((pBtn_info+times_onProbe)->irq_num, (irq_handler_t) gpio_irq_handler, IRQF_TRIGGER_FALLING, "my_gpio_irq", NULL) != 0){
-		printk("Interrupt error!\n: %d\n", (pBtn_info+times_onProbe)->irq_num);
-		gpio_free((pBtn_info+times_onProbe)->pBtn_gpio);
+	if(request_irq((pBtn_info+device_num)->irq_num, (irq_handler_t) gpio_irq_handler, IRQF_TRIGGER_FALLING, "my_gpio_irq", NULL) != 0){
+		printk("Interrupt error!\n: %d\n", (pBtn_info+device_num)->irq_num);
+		gpio_free((pBtn_info+device_num)->pBtn_gpio);
 		return -1;
 	}
-	    if(gpio_set_debounce((pBtn_info+times_onProbe)->pBtn_gpio,100)){
+	    if(gpio_set_debounce((pBtn_info+device_num)->pBtn_gpio,100)){
         printk("Debounce\n");
     }
 
-    times_onProbe = times_onProbe + 1;
 
     return 0;
 
