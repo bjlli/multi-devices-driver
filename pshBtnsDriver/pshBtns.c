@@ -82,9 +82,10 @@ static ssize_t store_pressNum( struct class *class, struct class_attribute *attr
 /* Interrupt callback */
 
 static irq_handler_t gpio_irq_handler(unsigned int irq, void *dev_id, struct pt_regs *regs) {
+    int irq_count;
+
     printk(KERN_ALERT "Interrupt was triggered!\n");
-	printk("Irq is:%d", irq); 
-    int irq_count = 0;
+    
     for(irq_count=0; irq_count<=times_onProbe;irq_count++){
 
         if((pBtn_info+irq_count)->irq_num == irq){
@@ -93,7 +94,6 @@ static irq_handler_t gpio_irq_handler(unsigned int irq, void *dev_id, struct pt_
     }
 
     printk("The push button %d was pressed", (pBtn_info+irq_count)->dev_num);
-    printk("GPIO number %d", (pBtn_info+irq_count)->pBtn_gpio);
     (pBtn_info+irq_count)->numOf_presses = (pBtn_info+irq_count)->numOf_presses + 1;
 
     return (irq_handler_t) IRQ_HANDLED; 
@@ -103,11 +103,12 @@ static irq_handler_t gpio_irq_handler(unsigned int irq, void *dev_id, struct pt_
 
 static int gpio_init_probe(struct platform_device *pdev){
 
-    printk("Probe!\n");
     int ret;
     struct device *dev = &pdev->dev;
     static struct lock_class_key __key;
-    
+
+    printk("Probe!\n");
+        
     if(times_onProbe == 0){
         /* class allocation */
         device_class = (struct class *)kmalloc(MAX_DEV_NUM*sizeof(struct class),GFP_ATOMIC);
@@ -183,17 +184,17 @@ static int gpio_init_probe(struct platform_device *pdev){
 static int gpio_exit_remove(struct platform_device *pdev){
 
     if(times_onRemove == 0){
-	 printk("First time on remove");    
+	    printk("First time on remove");    
     	class_unregister(device_class);
     	class_destroy(device_class);
     	kfree(class_attr);
-	kfree(pBtn_info);
+	    kfree(pBtn_info);
         free_irq(pBtn_info->irq_num,NULL);
         gpio_free(pBtn_info->pBtn_gpio);
     }else{
     	printk("Not the first time on remove");
-	class_unregister((device_class+times_onRemove));
-	class_destroy((device_class+times_onRemove));
+	    class_unregister((device_class+times_onRemove));
+	    class_destroy((device_class+times_onRemove));
         free_irq((pBtn_info+times_onRemove)->irq_num,NULL);
         gpio_free((pBtn_info+times_onRemove)->pBtn_gpio);
     }
