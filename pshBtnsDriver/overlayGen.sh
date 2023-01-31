@@ -33,3 +33,4 @@ echo "		};" >> overlay-$i.dts
 echo "	};" >> overlay-$i.dts
 echo "};" >> overlay-$i.dts
 armbian-add-overlay overlay-$i.dts
+reboot -h now
