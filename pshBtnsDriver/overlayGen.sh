@@ -28,9 +28,9 @@ do
         echo "	};" >> overlay-$i.dts
         echo "};" >> overlay-$i.dts
 
-        armbian-add-overlay
+        armbian-add-overlay overlay-$i.dts
         sudo reboot -h now
-        
+
         break
     fi
     ((i++))
