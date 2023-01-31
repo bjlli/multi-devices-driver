@@ -2,7 +2,7 @@
 
 declare -i i=0
 
-while [[ $i -le 5 ]]
+while [[ $i -lt 6 ]]
 do
     if [[ -f "overlay-$i.dts" ]]
     then
