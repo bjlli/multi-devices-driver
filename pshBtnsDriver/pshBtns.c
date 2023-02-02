@@ -65,8 +65,8 @@ static ssize_t show_pressNum( struct class *class, struct class_attribute *attr,
     uint value = 0;
     int num = 0;
 
-    num = (int)(*class).name[12];                                                                                  \    
-    num = num - 48;                                                                                                  \               
+    num = (int)(*class).name[12];                                                                                     
+    num = num - 48;                                                                                                               
     printk("Push button number: %d, READ!", num);
     value = (pBtn_info+num)->numOf_presses;
 
@@ -94,7 +94,7 @@ static irq_handler_t gpio_irq_handler(unsigned int irq, void *dev_id, struct pt_
     }
 
     printk("The push button %d was pressed", (pBtn_info+irq_count)->dev_num);
-    
+
     if((pBtn_info+irq_count)->numOf_presses <= 1000000){
 		(pBtn_info+irq_count)->numOf_presses = (pBtn_info+irq_count)->numOf_presses + 1;
 	}
