@@ -116,7 +116,7 @@ static int gpio_init_probe(struct platform_device *pdev){
 		    printk("Class allocation error");
 	    }
         /* class attribute allocation */
-	    class_attr = (struct class_attribute *)kmalloc(3*MAX_DEV_NUM*sizeof(struct class_attribute), GFP_ATOMIC);
+	    class_attr = (struct class_attribute *)kmalloc(MAX_DEV_NUM*sizeof(struct class_attribute), GFP_ATOMIC);
 	    if(!class_attr){
 		    printk("Class attribute allocation error");
 	    }
