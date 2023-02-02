@@ -94,7 +94,10 @@ static irq_handler_t gpio_irq_handler(unsigned int irq, void *dev_id, struct pt_
     }
 
     printk("The push button %d was pressed", (pBtn_info+irq_count)->dev_num);
-    (pBtn_info+irq_count)->numOf_presses = (pBtn_info+irq_count)->numOf_presses + 1;
+    
+    if((pBtn_info+irq_count)->numOf_presses <= 1000000){
+		(pBtn_info+irq_count)->numOf_presses = (pBtn_info+irq_count)->numOf_presses + 1;
+	}
 
     return (irq_handler_t) IRQ_HANDLED; 
 }
