@@ -116,21 +116,21 @@ static int gpio_init_probe(struct platform_device *pdev){
         /* class allocation */
         device_class = (struct class *)kmalloc(MAX_DEV_NUM*sizeof(struct class),GFP_ATOMIC);
         if(!device_class){
+            printk("Class allocation error");
             return -ENOMEM;
-		    printk("Class allocation error");
 	    }
         /* class attribute allocation */
 	    class_attr = (struct class_attribute *)kmalloc(MAX_DEV_NUM*sizeof(struct class_attribute), GFP_ATOMIC);
 	    if(!class_attr){
-            return -ENOMEM;
-		    printk("Class attribute allocation error");
+            printk("Class attribute allocation error");
+            return -ENOMEM;   
 	    }
         /* device_info allocation */
         pBtn_info = (struct device_info *)kmalloc(MAX_DEV_NUM*sizeof(struct device_info), GFP_ATOMIC);
         if(!pBtn_info){
+            printk("device_info allocation error");
             return -ENOMEM;
-		    printk("device_info allocation error");
-	    }
+	   }
         printk("First time on probe!");
     }else{
         printk("Not first time on probe!");
