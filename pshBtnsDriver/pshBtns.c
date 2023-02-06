@@ -29,8 +29,8 @@ struct device_info{
 
 /* Functions declarations */
 
-static int gpio_init_probe(struct platform_device *pdev);
-static int gpio_exit_remove(struct platform_device *pdev);
+static int pbtn_init_probe(struct platform_device *pdev);
+static int pbtn_exit_remove(struct platform_device *pdev);
 static ssize_t show_pressNum( struct class *class, struct class_attribute *attr, char *buf );
 static ssize_t store_pressNum( struct class *class, struct class_attribute *attr, const char *buf, size_t count );
 static irq_handler_t gpio_irq_handler(unsigned int irq, void *dev_id, struct pt_regs *regs);
@@ -43,8 +43,8 @@ static struct of_device_id pshBtns_ids[] = {
 };
 
 static struct platform_driver pshBtns_driver = {
-    .probe = gpio_init_probe,
-    .remove = gpio_exit_remove,
+    .probe = pbtn_init_probe,
+    .remove = pbtn_exit_remove,
     .driver = {
         .name = "pshBtns_driver",
         .owner = THIS_MODULE,
@@ -104,7 +104,7 @@ static irq_handler_t gpio_irq_handler(unsigned int irq, void *dev_id, struct pt_
 
 /* Probe and remove functions definitions*/
 
-static int gpio_init_probe(struct platform_device *pdev){
+static int pbtn_init_probe(struct platform_device *pdev){
 
     int ret;
     struct device *dev = &pdev->dev;
@@ -187,7 +187,7 @@ static int gpio_init_probe(struct platform_device *pdev){
 
 }
 
-static int gpio_exit_remove(struct platform_device *pdev){
+static int pbtn_exit_remove(struct platform_device *pdev){
 
     if(times_onRemove == 0){
 	    printk("First time on remove");    
