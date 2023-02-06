@@ -12,13 +12,13 @@ You can check Orange Pi GPIO pins [here](https://allwincnc.github.io/wiring.html
 
 # To insert/remove module into kernel
 
-Insert in amrbian 22.05 (you should generate all overlay files before that):
+Insert armbian 22.05 (you should generate all overlay files before that):
 
 make
 
 sudo insmod pshBtns.ko
 
-Remove on amrbian 22.05:
+Remove armbian 22.05:
 
 sudo rmmod pshBtns
 
