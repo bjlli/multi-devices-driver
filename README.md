@@ -6,19 +6,19 @@ The driver directories are located at /sys/class/ path and their names have the 
 
 # To generate a new overlay for Orange Pi (armbian 22.05):
 
-./overlayGen GPIO_PIN
+`./overlayGen GPIO_PIN`
 
 You can check Orange Pi GPIO pins [here](https://allwincnc.github.io/wiring.html).
 
 # To insert/remove module into kernel
 
 Insert armbian 22.05 (you should generate all overlay files before that):
-
+```
 make
 
 sudo insmod pshBtns.ko
-
+```
 Remove armbian 22.05:
 
-sudo rmmod pshBtns
+`sudo rmmod pshBtns`
 
